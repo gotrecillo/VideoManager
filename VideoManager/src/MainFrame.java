@@ -1,3 +1,9 @@
+import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+
 /**
  * Program that organizes your movies in a directory and all subdirectories. 
  * Allows you to rename files, and save each file in a Directory with a name derived 
@@ -6,6 +12,41 @@
  * @author gotre
  * @version 0.1
  * */
-public class MainFrame {
 
+@SuppressWarnings("serial")
+public class MainFrame extends MyJFrame implements Listeneable{
+	private JButton list, organize;
+	
+	 public MainFrame() {
+		super("Organizador de videos");
+		setSize(600,150);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		FlowLayout flow = new FlowLayout();
+		setLayout(flow);
+		setLookAndFeel();
+		setVisible(true);
+		
+		list = new JButton("Listar videos");
+		add(list);
+		list.addActionListener(this);
+		
+		organize = new JButton("Organizar videos");
+		add(organize);
+		organize.addActionListener(this);
+		
+	}
+	 
+	@SuppressWarnings("unused")
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (e.getSource() == list){
+			ListVideos listFrame = new ListVideos(this, true);
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	public static void main(String []args){
+		MainFrame app = new MainFrame();
+	}
+	
 }

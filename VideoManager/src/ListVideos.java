@@ -19,39 +19,72 @@ import javax.swing.*;
  */
 
 @SuppressWarnings("serial")
-public class ListVideos extends JFrame implements Listeneable{
+public class ListVideos extends MyJDialog implements Listeneable{
 
 	private List<String> files = new ArrayList<String>();
 	private JButton getDir, list;
-	private JLabel directorio;
+	private JLabel directory, formatOption;
 	private JTextField dirPath;
+	private JCheckBox onlyFiles, onlyDirectories, both, shortFiles, shortDirectories;
+	private ButtonGroup formatGroup;
 	private JFileChooser fc;
 	private File fileSelected;
 	private int returnVal;
 	private final String os = System.getProperty("os.name").toLowerCase();
 	private String filename;
-	//constructor
 	
-	public ListVideos(){
-		super("Listar peliculas");
+	//constructores y metodo initiate para crear la ventana.
+	public void initiate(){
+		setLookAndFeel();
 		if (os.startsWith("win")) {
 			filename = "\\list.txt";
 		}else{
 			filename = "/list.txt";
+		
 		}
 		setSize(600,150);
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		FlowLayout flow = new FlowLayout();
 		setLayout(flow);
 		
 		fc = new JFileChooser();
+		fc.setDialogTitle("Elige un directorio");
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-		directorio = new JLabel("Directorio: ");
-		add(directorio);
+		
+		directory = new JLabel("Directorio: ");
+		add(directory);
 		
 		dirPath = new JTextField("", 50);
 		dirPath.setEditable(false);
 		add(dirPath);
+		
+		formatOption = new JLabel("Formato de la lista: ");
+		add(formatOption);
+		
+		onlyFiles = new JCheckBox("Solo videos", false);
+		add(onlyFiles);
+		onlyFiles.addActionListener(this);
+		
+		onlyDirectories = new JCheckBox("Solo carpetas", false);
+		add(onlyDirectories);
+		onlyDirectories.addActionListener(this);
+		
+		both = new JCheckBox("Ambos", true);
+		add(both);
+		both.addActionListener(this);
+		
+		shortDirectories = new JCheckBox("Solo nombre de directorios", true);
+		add(shortDirectories);
+		shortDirectories.addActionListener(this);
+		
+		shortFiles = new JCheckBox("Solo nombre de videos", false);
+		add(shortFiles);
+		shortFiles.addActionListener(this);
+		
+		formatGroup = new ButtonGroup();
+		formatGroup.add(both);
+		formatGroup.add(onlyDirectories);
+		formatGroup.add(onlyFiles);
 		
 		getDir = new JButton("Cambiar directorio");
 		add(getDir);
@@ -61,31 +94,105 @@ public class ListVideos extends JFrame implements Listeneable{
 		add(list);
 		list.addActionListener(this);
 		
-		setVisible(true);
+		setVisible(true);	
+	}
+	public ListVideos(){
+		super();
+		initiate();
+	}
+	
+	public ListVideos(Frame owner){
+		super("Listar videos", owner);
+		initiate();
+	}
+	
+	public ListVideos(Frame owner, boolean b){
+		super("Listar videos", owner, b);
+		initiate();
+	}
+	
+	//Get the list of the directories that has videos	
+	public void getDirectoriesList(String path, List<String> files){
 		
+		 File root = new File( path );
+	        File[] list = root.listFiles();
+	        String absolutePath, fileName;
+	        Arrays.sort(list);
+
+	        if (list == null) return;
+
+	        for ( File f : list ) {
+	            if ( f.isDirectory() ) {  
+	            	fileName = f.getName();
+	            	absolutePath = f.getAbsolutePath();
+	            	if (hasVideos(absolutePath)){
+	            		if (shortDirectories.isSelected()){
+	            			files.add(fileName);
+	            		}else{
+	            			files.add(absolutePath);
+	            		}
+	            	}
+	                getDirectoriesList(absolutePath, files );
+	            }
+	        }
+	    }
+	
+	//Get the list of videos
+	public void getFileList(String path, List<String> files){
+		File root = new File( path );
+        File[] list = root.listFiles();
+        String absolutePath, fileName;
+        Arrays.sort(list);
+        
+        if (list == null) return;
+        for ( File f : list ) {
+        	absolutePath = f.getAbsolutePath();
+        	fileName = f.getName();
+            if ( f.isDirectory() ) {  
+                getFileList( absolutePath, files );
+            }
+            else {
+            	if (isVideo(absolutePath)){
+            		if (shortFiles.isSelected()){
+            			files.add(fileName); 
+            		}else{
+            			files.add( absolutePath);
+            		}
+            	}
+            }
+        }
 	}
 	
 	//Get the list of videos and their directories
-	public void getVideos( String path, List<String> files ) {
+	public void getFullList(String path, List<String> files) {
 
         File root = new File( path );
         File[] list = root.listFiles();
-        String absolutePath;
+        String absolutePath, fileName;
         Arrays.sort(list);
 
         if (list == null) return;
 
         for ( File f : list ) {
         	absolutePath = f.getAbsolutePath();
+        	fileName = f.getName();
             if ( f.isDirectory() ) {  
             	if (hasVideos(absolutePath)){
-            		files.add(f.getName());
+            		if (shortDirectories.isSelected()){
+            			files.add(fileName);
+            		}else{
+            			files.add(absolutePath);
+            		}
             	}
-                getVideos( absolutePath, files );
+                getFullList( absolutePath, files );
             }
             else {
             	if (isVideo(absolutePath)){
-            		files.add("	" + absolutePath);
+            		if (shortFiles.isSelected()){
+            			files.add("   " + fileName);
+            		}else{
+            			files.add("   " + absolutePath);
+            		}
             	}
             }
         }
@@ -105,7 +212,7 @@ public class ListVideos extends JFrame implements Listeneable{
 	// Write in the file the list of files and directories
 	public void writeList(List<String> list, String path){
 		File listFile = new File(path+filename);
-		 
+		
 		 try {
 			FileWriter fw = new FileWriter(listFile);
 			BufferedWriter bw = new BufferedWriter(fw);
@@ -143,11 +250,11 @@ public class ListVideos extends JFrame implements Listeneable{
 		return false;
 	}
 	
+	@SuppressWarnings("unused")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
 			if (e.getSource() == getDir){
-				System.out.println(os);
 				returnVal = fc.showOpenDialog(null);
 				if (returnVal == JFileChooser.APPROVE_OPTION){
 					fileSelected = fc.getSelectedFile();
@@ -156,14 +263,22 @@ public class ListVideos extends JFrame implements Listeneable{
 			}
 			
 			if (e.getSource() == list){
+				String path = fileSelected.getAbsolutePath();
 				if (dirPath.getText().equals("")){
 					JOptionPane.showMessageDialog(null, "Selecciona un directorio", "Directorio no seleccionado", JOptionPane.INFORMATION_MESSAGE);
 				}else{
 					files.clear();
-					getVideos(fileSelected.getAbsolutePath(), files);
-					createListFile(fileSelected.getAbsolutePath());
-					writeList(files, fileSelected.getAbsolutePath());
-					JOptionPane.showMessageDialog(null, "Archivo creado en: "+fileSelected.getAbsolutePath()+filename, "Archivo creado", JOptionPane.INFORMATION_MESSAGE);
+					if (both.isSelected()){
+						getFullList(path, files);
+					}else if (onlyDirectories.isSelected()){
+						getDirectoriesList(path, files);
+					}else{
+						getFileList(path, files);
+					}
+					createListFile(path);
+					writeList(files, path);
+					JOptionPane.showMessageDialog(null, "Archivo creado en: "+path+filename, "Archivo creado", JOptionPane.INFORMATION_MESSAGE);
+					ShowListVideos listFrame = new ShowListVideos(path+filename, null, true);
 				}
 			}
 		} catch (Exception e2) {
@@ -175,7 +290,7 @@ public class ListVideos extends JFrame implements Listeneable{
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) {
-		ListVideos mainFrame = new ListVideos();
+		ListVideos mainFrame = new ListVideos(null);
 	}
 
 }
