@@ -4,9 +4,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Arrays;
 
 import javax.swing.*;
 
@@ -19,22 +17,18 @@ import javax.swing.*;
  */
 
 @SuppressWarnings("serial")
-public class ListVideos extends MyJDialog implements Listeneable{
+public class ListVideos extends MyJDialogChooser implements Listeneable{
 
-	private List<String> files = new ArrayList<String>();
-	private JButton getDir, list;
-	private JLabel directory, formatOption;
+	private JButton  list;
+	private JLabel  formatOption;
 	private JTextField dirPath;
 	private JCheckBox onlyFiles, onlyDirectories, both, shortFiles, shortDirectories;
 	private ButtonGroup formatGroup;
-	private JFileChooser fc;
-	private File fileSelected;
-	private int returnVal;
 	private final String os = System.getProperty("os.name").toLowerCase();
 	private String filename;
 	
-	//constructores y metodo initiate para crear la ventana.
-	public void initiate(){
+	//constructors and initiate method to create the window.
+	private void initiate(){
 		setLookAndFeel();
 		if (os.startsWith("win")) {
 			filename = "\\list.txt";
@@ -96,8 +90,9 @@ public class ListVideos extends MyJDialog implements Listeneable{
 		
 		setVisible(true);	
 	}
+	
 	public ListVideos(){
-		super();
+		super("Listar videos", null);
 		initiate();
 	}
 	
@@ -111,94 +106,7 @@ public class ListVideos extends MyJDialog implements Listeneable{
 		initiate();
 	}
 	
-	//Get the list of the directories that has videos	
-	public void getDirectoriesList(String path, List<String> files){
-		
-		 File root = new File( path );
-	        File[] list = root.listFiles();
-	        String absolutePath, fileName;
-	        Arrays.sort(list);
-
-	        if (list == null) return;
-
-	        for ( File f : list ) {
-	            if ( f.isDirectory() ) {  
-	            	fileName = f.getName();
-	            	absolutePath = f.getAbsolutePath();
-	            	if (hasVideos(absolutePath)){
-	            		if (shortDirectories.isSelected()){
-	            			files.add(fileName);
-	            		}else{
-	            			files.add(absolutePath);
-	            		}
-	            	}
-	                getDirectoriesList(absolutePath, files );
-	            }
-	        }
-	    }
-	
-	//Get the list of videos
-	public void getFileList(String path, List<String> files){
-		File root = new File( path );
-        File[] list = root.listFiles();
-        String absolutePath, fileName;
-        Arrays.sort(list);
-        
-        if (list == null) return;
-        for ( File f : list ) {
-        	absolutePath = f.getAbsolutePath();
-        	fileName = f.getName();
-            if ( f.isDirectory() ) {  
-                getFileList( absolutePath, files );
-            }
-            else {
-            	if (isVideo(absolutePath)){
-            		if (shortFiles.isSelected()){
-            			files.add(fileName); 
-            		}else{
-            			files.add( absolutePath);
-            		}
-            	}
-            }
-        }
-	}
-	
-	//Get the list of videos and their directories
-	public void getFullList(String path, List<String> files) {
-
-        File root = new File( path );
-        File[] list = root.listFiles();
-        String absolutePath, fileName;
-        Arrays.sort(list);
-
-        if (list == null) return;
-
-        for ( File f : list ) {
-        	absolutePath = f.getAbsolutePath();
-        	fileName = f.getName();
-            if ( f.isDirectory() ) {  
-            	if (hasVideos(absolutePath)){
-            		if (shortDirectories.isSelected()){
-            			files.add(fileName);
-            		}else{
-            			files.add(absolutePath);
-            		}
-            	}
-                getFullList( absolutePath, files );
-            }
-            else {
-            	if (isVideo(absolutePath)){
-            		if (shortFiles.isSelected()){
-            			files.add("   " + fileName);
-            		}else{
-            			files.add("   " + absolutePath);
-            		}
-            	}
-            }
-        }
-    }
-	
-	// Create the file with the list of files and directories
+	//create the file that is going to contain the list
 	public void createListFile(String path){
 
 		try {
@@ -210,14 +118,32 @@ public class ListVideos extends MyJDialog implements Listeneable{
 	}
 	
 	// Write in the file the list of files and directories
-	public void writeList(List<String> list, String path){
+	public void writeFullList(List<String> list, String path){
 		File listFile = new File(path+filename);
+		File actualFile;
+		String actualPath, actualName;
 		
 		 try {
 			FileWriter fw = new FileWriter(listFile);
 			BufferedWriter bw = new BufferedWriter(fw);
 			for (int i = 0; i < list.size(); i++) {
-				bw.write(list.get(i) + "\n");
+				actualPath = list.get(i);
+				actualFile = new File(actualPath);
+				if (isVideo(actualPath)) {
+					if (shortFiles.isSelected()){
+						actualName = actualFile.getName();
+						bw.write(actualName + "\n");
+					}else{
+						bw.write(actualPath + "\n");
+					}
+				}else{
+					if (shortDirectories.isSelected()){
+						actualName = actualFile.getName();
+						bw.write(actualName + "\n");
+					}else{
+						bw.write(actualPath + "\n");
+					}
+				}
 			}
 			bw.close();
 			fw.close();
@@ -227,33 +153,69 @@ public class ListVideos extends MyJDialog implements Listeneable{
 		}
 	}
 	
-	//check if a file is a video
-	public boolean isVideo(String path){
-		String[] formats = {".mkv", ".avi", ".mp4", ".flv", "wmv", ".mpg", ".mpeg"};
-		for (int i = 0; i < formats.length; i++) {
-			if (path.endsWith(formats[i])){
-				return true;
+	//write in the file the list of the movies
+	public void writeFilesList(List<String> list, String path){
+		File listFile = new File(path+filename);
+		File actualFile;
+		String actualPath, actualName;
+		
+		 try {
+			FileWriter fw = new FileWriter(listFile);
+			BufferedWriter bw = new BufferedWriter(fw);
+			for (int i = 0; i < list.size(); i++) {
+				actualPath = list.get(i);
+				actualFile = new File(actualPath);
+				if (isVideo(actualPath)) {
+					if (shortFiles.isSelected()){
+						actualName = actualFile.getName();
+						bw.write(actualName + "\n");
+					}else{
+						bw.write(actualPath + "\n");
+					}
+				}
 			}
+			bw.close();
+			fw.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return false;
 	}
 	
-	//check if a directory has videos
-	public boolean hasVideos(String path){
-		File root = new File(path);
-		File[] list = root.listFiles();
-		for (int i = 0; i < list.length; i++) {
-			if (isVideo(list[i].getAbsolutePath())){
-				return true;
+	//write in the file the list of the directories
+	public void writeDirectoriesList(List<String> list, String path){
+		File listFile = new File(path+filename);
+		File actualFile;
+		String actualPath, actualName;
+		
+		 try {
+			FileWriter fw = new FileWriter(listFile);
+			BufferedWriter bw = new BufferedWriter(fw);
+			for (int i = 0; i < list.size(); i++) {
+				actualPath = list.get(i);
+				actualFile = new File(actualPath);
+				if (isVideo(actualPath)) {
+					if (shortFiles.isSelected()){
+						actualName = actualFile.getName();
+						bw.write(actualName + "\n");
+					}else{
+						bw.write(actualPath + "\n");
+					}
+				}
 			}
+			bw.close();
+			fw.close();
+			
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		return false;
 	}
 	
 	@SuppressWarnings("unused")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		try {
+			//choose the directory path
 			if (e.getSource() == getDir){
 				returnVal = fc.showOpenDialog(null);
 				if (returnVal == JFileChooser.APPROVE_OPTION){
@@ -262,23 +224,24 @@ public class ListVideos extends MyJDialog implements Listeneable{
 				}
 			}
 			
+			//create the list with the selected options
 			if (e.getSource() == list){
 				String path = fileSelected.getAbsolutePath();
 				if (dirPath.getText().equals("")){
 					JOptionPane.showMessageDialog(null, "Selecciona un directorio", "Directorio no seleccionado", JOptionPane.INFORMATION_MESSAGE);
 				}else{
 					files.clear();
-					if (both.isSelected()){
-						getFullList(path, files);
-					}else if (onlyDirectories.isSelected()){
-						getDirectoriesList(path, files);
-					}else{
-						getFileList(path, files);
-					}
+					getList(path, files);
 					createListFile(path);
-					writeList(files, path);
+					if (both.isSelected()){
+						writeFullList(files, path);
+					}else if (onlyDirectories.isSelected()){
+						writeDirectoriesList(files, path);
+					}else{
+						writeFilesList(files, path);
+					}
 					JOptionPane.showMessageDialog(null, "Archivo creado en: "+path+filename, "Archivo creado", JOptionPane.INFORMATION_MESSAGE);
-					ShowListVideos listFrame = new ShowListVideos(path+filename, null, true);
+					ShowListVideos listFrame = new ShowListVideos(path+filename, this, true);
 				}
 			}
 		} catch (Exception e2) {

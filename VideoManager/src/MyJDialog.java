@@ -13,6 +13,11 @@ public class MyJDialog extends JDialog{
 		super();
 	}
 	
+	public MyJDialog(String title, JDialog owner, boolean b){
+		super(owner, b);
+		setTitle(title);
+	}
+	
 	public MyJDialog(String title, Frame owner, boolean b){
 		super(owner, b);
 		setTitle(title);
