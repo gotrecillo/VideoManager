@@ -34,12 +34,12 @@ public class ListVideos extends JFrame implements Listeneable{
 	
 	public ListVideos(){
 		super("Listar peliculas");
-		if (os.equals("win")) {
+		if (os.startsWith("win")) {
 			filename = "\\list.txt";
 		}else{
 			filename = "/list.txt";
 		}
-		setSize(600,100);
+		setSize(600,150);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		FlowLayout flow = new FlowLayout();
 		setLayout(flow);
@@ -145,26 +145,31 @@ public class ListVideos extends JFrame implements Listeneable{
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
-		if (e.getSource() == getDir){
-			returnVal = fc.showOpenDialog(null);
-			if (returnVal == JFileChooser.APPROVE_OPTION){
-				fileSelected = fc.getSelectedFile();
-				dirPath.setText(fileSelected.getAbsolutePath());
+		try {
+			if (e.getSource() == getDir){
+				System.out.println(os);
+				returnVal = fc.showOpenDialog(null);
+				if (returnVal == JFileChooser.APPROVE_OPTION){
+					fileSelected = fc.getSelectedFile();
+					dirPath.setText(fileSelected.getAbsolutePath());
+				}
 			}
+			
+			if (e.getSource() == list){
+				if (dirPath.getText().equals("")){
+					JOptionPane.showMessageDialog(null, "Selecciona un directorio", "Directorio no seleccionado", JOptionPane.INFORMATION_MESSAGE);
+				}else{
+					files.clear();
+					getVideos(fileSelected.getAbsolutePath(), files);
+					createListFile(fileSelected.getAbsolutePath());
+					writeList(files, fileSelected.getAbsolutePath());
+					JOptionPane.showMessageDialog(null, "Archivo creado en: "+fileSelected.getAbsolutePath()+filename, "Archivo creado", JOptionPane.INFORMATION_MESSAGE);
+				}
+			}
+		} catch (Exception e2) {
+			JOptionPane.showMessageDialog(null, "Directorio con permisos especiales del sistema operativo", "Error", JOptionPane.INFORMATION_MESSAGE);
 		}
 		
-		if (e.getSource() == list){
-			if (dirPath.getText().equals("")){
-				JOptionPane.showMessageDialog(null, "Selecciona un directorio", "Directorio no seleccionado", JOptionPane.INFORMATION_MESSAGE);
-			}else{
-				files.clear();
-				getVideos(fileSelected.getAbsolutePath(), files);
-				createListFile(fileSelected.getAbsolutePath());
-				writeList(files, fileSelected.getAbsolutePath());
-				JOptionPane.showMessageDialog(null, "Archivo creado en: "+fileSelected.getAbsolutePath()+"/list.txt", "Archivo creado", JOptionPane.INFORMATION_MESSAGE);
-			}
-		}
 	}
 	
 	
