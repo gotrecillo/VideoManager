@@ -240,6 +240,7 @@ public class ListVideos extends MyJDialogChooser implements Listeneable{
 					}else{
 						writeFilesList(files, path);
 					}
+					setVisible(false);
 					JOptionPane.showMessageDialog(null, "Archivo creado en: "+path+filename, "Archivo creado", JOptionPane.INFORMATION_MESSAGE);
 					ShowListVideos listFrame = new ShowListVideos(path+filename, this, true);
 				}
