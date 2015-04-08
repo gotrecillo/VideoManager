@@ -143,4 +143,8 @@ public class RenameDialog extends MyJDialog implements Listeneable{
 			}
 		}
 	}
+	
+	public static void main(String[] args){
+		RenameDialog renameFrame = new RenameDialog(new File("/home/gotre/este titulo de pelicula es una mierda(1080)[en-es][subs][www.miscojonesenvinagre.com].mkv"), null, true);
+	}
 }
