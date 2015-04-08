@@ -1,9 +1,4 @@
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
-
 import javax.swing.JDialog;
-import javax.swing.JFrame;
-import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
 import java.io.*;
@@ -17,24 +12,18 @@ import java.util.Scanner;
 
 @SuppressWarnings("serial")
 public class ShowListVideos extends MyJDialog{
-	private JScrollPane scrollPane;
 	private JTextArea text;
-	private FlowLayout dis;
 	private File file;
 	
 	//Constructor y metodo initiate para crear la ventana
 	private void initiate(String path){
 		setSize(1200, 780);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		text = new JTextArea("", 50, 100);
-		dis = new FlowLayout();
-		setLayout(dis);
 		add(text);
 		fillText();
 		text.setEditable(false);
-		setVisible(true);
-		scrollPane = new JScrollPane(text, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
-		getContentPane().add(scrollPane, BorderLayout.CENTER);
+		super.initiate();
+		
 	}
 	
 	public ShowListVideos(String path, JDialog owner, boolean b){
@@ -55,11 +44,4 @@ public class ShowListVideos extends MyJDialog{
 			e.printStackTrace();
 		} 
 	}
-	
-	
-	@SuppressWarnings("unused")
-	public static void main(String[] args) {
-		ShowListVideos app = new ShowListVideos("/home/gotre/list.txt", null, true);
-	}
-
 }

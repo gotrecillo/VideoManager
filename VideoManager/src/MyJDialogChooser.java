@@ -13,15 +13,21 @@ import javax.swing.JTextField;
 
 @SuppressWarnings("serial")
 public class MyJDialogChooser extends MyJDialog{
-	protected List<String> files = new ArrayList<String>();
+	protected List<File> files = new ArrayList<File>();
 	protected JButton getDir, organize;
 	protected JLabel directory;
 	protected JTextField dirPath;
 	protected JFileChooser fc;
-	protected File fileSelected;
+	protected File rootFile;
 	protected int returnVal;
 	
 	
+	public void initiate(){
+		fc = new JFileChooser();
+		fc.setDialogTitle("Elige un directorio");
+		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		super.initiate();
+	}
 	public MyJDialogChooser(String title, Frame owner) {
 		super(title, owner);
 	}
@@ -36,11 +42,10 @@ public class MyJDialogChooser extends MyJDialog{
 	
 	
 	//check if a directory has videos
-	public boolean hasVideos(String path){
-		File root = new File(path);
+	public boolean hasVideos(File root){
 		File[] list = root.listFiles();
 		for (int i = 0; i < list.length; i++) {
-			if (isVideo(list[i].getAbsolutePath())){
+			if (isVideo(list[i])){
 				return true;
 			}
 		}
@@ -48,10 +53,11 @@ public class MyJDialogChooser extends MyJDialog{
 	}
 	
 	//check if a file is a video
-	public boolean isVideo(String path){
+	public boolean isVideo(File file){
 		String[] formats = {".mkv", ".avi", ".mp4", ".flv", "wmv", ".mpg", ".mpeg"};
 		for (int i = 0; i < formats.length; i++) {
-			if (path.endsWith(formats[i])){
+			String name = file.getName();
+			if (name.endsWith(formats[i])){
 				return true;
 			}
 		}
@@ -59,46 +65,49 @@ public class MyJDialogChooser extends MyJDialog{
 	}
 	
 	//Get the list of videos
-	public void getFileList(String path, List<String> files){
-
-		File root = new File( path );
+	public void getFileList(File root, List<File> files){
+		
         File[] list = root.listFiles();
-        String absolutePath;
         Arrays.sort(list);
 
         if (list == null) return;
 
         for ( File f : list ) {
-        	absolutePath = f.getAbsolutePath();
 	        	if ( f.isDirectory() ) {  
-	        		getList( absolutePath, files );
-	            } else if (isVideo(absolutePath)) {
-	            	files.add(absolutePath);
+	        		getList(f, files );
+	            } else if (isVideo(f)) {
+	            	files.add(f);
 	            }
         }
 	}
 	
 	
 	//Get the list of videos and their directories
-	public void getList(String path, List<String> files) {
+	public void getList(File root, List<File> files) {
 
-        File root = new File( path );
         File[] list = root.listFiles();
-        String absolutePath;
         Arrays.sort(list);
 
         if (list == null) return;
 
         for ( File f : list ) {
-        	absolutePath = f.getAbsolutePath();
 	        	if ( f.isDirectory() ) {  
-	        		if (hasVideos(absolutePath)){
-	        			files.add(absolutePath);
+	        		if (hasVideos(f)){
+	        			files.add(f);
 	            	}
-	        		getList( absolutePath, files );
-	            } else if (isVideo(absolutePath)) {
-	            	files.add(absolutePath);
+	        		getList( f, files );
+	            } else if (isVideo(f)) {
+	            	files.add(f);
 	            }
         }
+	}
+	
+	//Open a file chooser and pick a directory
+	public void chooseDirectoryPath(){
+		returnVal = fc.showOpenDialog(null);
+		if (returnVal == JFileChooser.APPROVE_OPTION){
+			rootFile = fc.getSelectedFile();
+			dirPath.setText(rootFile.getAbsolutePath());
+		}
 	}
 }

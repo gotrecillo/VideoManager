@@ -1,6 +1,8 @@
+import java.awt.FlowLayout;
 import java.awt.Frame;
 
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -8,6 +10,16 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 @SuppressWarnings("serial")
 public class MyJDialog extends JDialog{
+	
+	protected final String os = System.getProperty("os.name").toLowerCase();
+	protected FlowLayout flow = new FlowLayout();
+	
+	public void initiate(){
+		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setLayout(flow);
+		setVisible(true);
+		setLookAndFeel();
+	}
 	
 	public MyJDialog(){
 		super();

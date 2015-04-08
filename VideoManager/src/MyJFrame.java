@@ -1,3 +1,5 @@
+import java.awt.FlowLayout;
+
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -6,6 +8,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 @SuppressWarnings("serial")
 public class MyJFrame extends JFrame{
+	protected FlowLayout flow = new FlowLayout();
 	
 	public MyJFrame(String title){
 		super(title);

@@ -1,4 +1,3 @@
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JButton;
@@ -21,7 +20,6 @@ public class MainFrame extends MyJFrame implements Listeneable{
 		super("Organizador de videos");
 		setSize(600,150);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		FlowLayout flow = new FlowLayout();
 		setLayout(flow);
 		setLookAndFeel();
 		setVisible(true);
@@ -42,6 +40,9 @@ public class MainFrame extends MyJFrame implements Listeneable{
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == list){
 			ListVideos listFrame = new ListVideos(this, true);
+		}
+		if (e.getSource() == organize){
+			OrganizeVideos organizeFrame = new OrganizeVideos(this, true);
 		}
 	}
 	

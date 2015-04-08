@@ -1,10 +1,8 @@
-import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
+import java.io.File;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
@@ -14,16 +12,8 @@ import javax.swing.JTextField;
 public class OrganizeVideos extends MyJDialogChooser implements Listeneable{
 	private JButton organize;
 	
-	private void initiate(){
-		setLookAndFeel();
+	public void initiate(){
 		setSize(600,150);
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		FlowLayout flow = new FlowLayout();
-		setLayout(flow);
-		
-		fc = new JFileChooser();
-		fc.setDialogTitle("Elige un directorio");
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		
 		directory = new JLabel("Directorio: ");
 		add(directory);
@@ -39,8 +29,7 @@ public class OrganizeVideos extends MyJDialogChooser implements Listeneable{
 		organize = new JButton("Organizar");
 		add(organize);
 		organize.addActionListener(this);
-		
-		setVisible(true);	
+		super.initiate();;
 	}
 	
 	public OrganizeVideos() {
@@ -57,31 +46,27 @@ public class OrganizeVideos extends MyJDialogChooser implements Listeneable{
 		super("Organiza los videos", owner, b);
 		initiate();
 	}
-
+	
+	
+	public void chooseNewName(File file){
+		
+	}
+	
+	@SuppressWarnings("unused")
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == getDir){
-			returnVal = fc.showOpenDialog(null);
-			if (returnVal == JFileChooser.APPROVE_OPTION){
-				fileSelected = fc.getSelectedFile();
-				dirPath.setText(fileSelected.getAbsolutePath());
-			}
+			chooseDirectoryPath();
 		}
 		
 		if (e.getSource() == organize){
-			String path = fileSelected.getAbsolutePath();
 			if (dirPath.getText().equals("")){
 				JOptionPane.showMessageDialog(null, "Selecciona un directorio", "Directorio no seleccionado", JOptionPane.INFORMATION_MESSAGE);
 			}else{
 				files.clear();
-				getFileList(path, files);
+				getFileList(rootFile, files);
+				RenameDialog renameFrame = new RenameDialog(new File("test.txt"),this, true);
 			}
 		}
 	}
-	
-	@SuppressWarnings("unused")
-	public static void main(String[] args){
-		OrganizeVideos app = new OrganizeVideos();	
-	}
-
 }
